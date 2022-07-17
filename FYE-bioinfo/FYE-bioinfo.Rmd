@@ -1,0 +1,88 @@
+---
+title: "FYE-bioinfo"
+output: html_document
+---
+Start by reading the data file
+```{r}
+covid.data <- read.csv("covid19_variants.csv")
+covid.data
+```
+loading the lubridate package so I can organize the dates
+
+```{r}
+library(lubridate)
+```
+
+
+Assigning a new colum where the date is in the year, month, day format. I think it looks like the data came with this format in the date column, but I am doing this just to be safe.
+```{r}
+covid.data$as_of_date <- ymd(covid.data$date)
+```
+loading the dplyr package
+```{r}
+install.packages("dplyr")
+library(dplyr)
+```
+just checking the dataframe to make sure that everything looks right and my column was added
+```{r}
+covid.data
+
+```
+```{r}
+install.packages("ggplot2")
+```
+realizing I hadn't installed ggplot and adding that package, then I am just checking to see what the graph looks like before I make any changes.
+```{r}
+library(ggplot2)
+ggplot(covid.data, aes(x=as_of_date, y=percentage, group=variant_name, color=variant_name))+
+  geom_line()
+```
+I want to remove total and other from the plot so that I am just looking at the variants that we are interested in. (I am sure that there is a better, more concise way of writing this code, but this is all I got)
+```{r}
+#removing Total and other from the dataset
+covid.data.nototal <-filter(covid.data, variant_name !="Total")
+covid.data.nototal
+```
+
+```{r}
+#removing other from the dataset
+covid.data.variantonly <-filter(covid.data.nototal, variant_name !="Other")
+covid.data.variantonly
+```
+Now I am plotting it again this time without the total and other variables.
+
+```{r}
+
+ggplot(covid.data.variantonly, aes(x=as_of_date, y=percentage, group=variant_name, color=variant_name))+
+  geom_line()
+```
+Now I am assigning my graph to a variable just so it is a little less busy, while I add formating for the date 
+```{r}
+p<-ggplot(covid.data.variantonly) +
+  aes(as_of_date,
+      percentage, 
+      group=variant_name, color=variant_name) +
+  geom_line() +
+  labs(x="Date", y="Percentage of sequenced specimens",
+       title="Covid19 Variants in California")
+      
+```
+
+The graph looks how I want it to now
+```{r}
+p+scale_x_date(date_labels = "%b %Y")
+```
+Uploading to Github
+
+```{r}
+install.packages("usethis")
+library(usethis)
+create_github_token()
+```
+
+```{r}
+install.packages("gitcreds")
+library(gitcreds)
+gitcreds_set()
+```
+
